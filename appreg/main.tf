@@ -79,9 +79,8 @@ output "group_object_id" {
   value = azuread_group.demo.object_id
 }
 
-output "app_application_id" {
-  # Client ID
-  value = azuread_application.app.application_id
+output "app_client_id" {
+  value = azuread_application.app.client_id
 }
 
 output "app_object_id" {
