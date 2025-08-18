@@ -1,11 +1,18 @@
-# Configure Azure AD Provider
 terraform {
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
       version = "~>2.0"
     }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.0"
+    }
   }
+}
+
+provider "azurerm" {
+  features {}
 }
 
 provider "azuread" {
@@ -19,7 +26,7 @@ resource "azuread_application" "app" {
 
 # Create Service Principal for the App
 resource "azuread_service_principal" "app_sp" {
-  application_id = azuread_application.app.application_id
+  client_id = azuread_application.app.client_id
 }
 
 # Create User
