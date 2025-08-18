@@ -2,47 +2,38 @@ terraform {
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.0"
-    }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.0"
+      version = "~> 2.0"
     }
   }
 }
 
-provider "azurerm" {
-  features {}
-}
-
+# Auth will use your 'az login' session; we only pass tenant_id
 provider "azuread" {
   tenant_id = var.tenant_id
 }
 
-# Create App Registration
+# --- App Registration ---
 resource "azuread_application" "app" {
   display_name = var.app_name
 }
 
-# Create Service Principal for the App
-resource "azuread_service_principal" "app_sp" {
-  client_id = azuread_application.app.client_id
-}
-
-# Create User
+# --- User ---
 resource "azuread_user" "user" {
-  user_principal_name = var.user_email
-  display_name        = var.user_display_name
-  password            = var.user_password
+  user_principal_name   = var.user_email          # e.g. test.user@yourtenant.onmicrosoft.com
+  display_name          = var.user_display_name   # e.g. "Test User"
+  mail_nickname         = var.user_mail_nickname  # e.g. "testuser"
+  password              = var.user_password       # meet tenant password policy
+  force_password_change = false
 }
 
-# Create Group
+# --- Group ---
 resource "azuread_group" "group" {
-  display_name     = var.group_name
+  display_name     = var.group_name               # e.g. "MyAppUsers"
   security_enabled = true
+  mail_enabled     = false
 }
 
-# Add User to Group
+# --- Add user to group ---
 resource "azuread_group_member" "member" {
   group_object_id  = azuread_group.group.object_id
   member_object_id = azuread_user.user.object_id
