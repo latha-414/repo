@@ -3,7 +3,7 @@ data "azuread_client_config" "current" {}
 resource "azuread_application" "example" {
   display_name     = "example"
   identifier_uris  = ["api://example-app"]
-  logo_image       = filebase64("/path/to/logo.png")
+#  logo_image       = filebase64("/path/to/logo.png")
   owners           = [data.azuread_client_config.current.object_id]
   sign_in_audience = "AzureADMultipleOrgs"
 
