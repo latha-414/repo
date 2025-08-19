@@ -29,7 +29,9 @@ resource "azuread_group" "new_group" {
 }
 
 # Add User to Group
+# Add User to Group (fixed)
 resource "azuread_group_member" "add_user_to_group" {
-  group_object_id  = azuread_group.new_group.id
-  member_object_id = azuread_user.new_user.id
+  group_object_id  = azuread_group.new_group.object_id
+  member_object_id = azuread_user.new_user.object_id
 }
+
