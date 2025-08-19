@@ -8,8 +8,10 @@ terraform {
 }
 
 provider "azuread" {
-  tenant_id = "bc2e6364-d970-4392-87a4-2bfe5ec07c6f" # your tenant
+  tenant_id       = "bc2e6364-d970-4392-87a4-2bfe5ec07c6f"
+  use_cli         = true
 }
+
 
 # App Registration
 resource "azuread_application" "example" {
