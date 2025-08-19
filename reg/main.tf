@@ -1,60 +1,53 @@
-provider "azuread" {
-  # You can explicitly specify the tenant ID here if needed,
-  # otherwise, it will use the tenant associated with your Azure CLI login.
-  # tenant_id = "your_azure_ad_tenant_id"
-}
-
-resource "azuread_application" "my_app_registration" {
-  display_name = "MyTerraformApp"
-  sign_in_audience = "AzureADMyOrg" # Or other suitable audience like "AzureADMultipleOrgs"
-
-  # Optional: Define redirect URIs for web applications
-  web {
-    redirect_uris = [
-      "http://localhost:8080/auth/callback",
-      "https://myapp.azurewebsites.net/auth/callback"
-    ]
+terraform {
+  required_providers {
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.47.0"
+    }
   }
-
-  # Optional: Define API permissions if needed
-  # api {
-  #   oauth2_permission_scope {
-  #     admin_consent_description  = "Allow the application to access user data."
-  #     admin_consent_display_name = "Access user data"
-  #     value                      = "user_impersonation"
-  #     enabled                    = true
-  #   }
-  # }
 }
 
-# Optional: Create a service principal for the application
-resource "azuread_service_principal" "my_app_service_principal" {
-  application_id = azuread_application.my_app_registration.application_id
-  # Optional: Define app role assignments if needed
-  # app_role_assignment {
-  #   app_role_id         = "some_app_role_id"
-  #   principal_object_id = azuread_service_principal.my_app_service_principal.object_id
-  #   resource_object_id  = azuread_application.my_app_registration.object_id
-  # }
+provider "azuread" {
+  # Assumes you're authenticated via Azure CLI or environment variables
 }
 
-# Optional: Create a client secret for the application
-resource "azuread_application_password" "my_app_secret" {
-  application_object_id = azuread_application.my_app_registration.object_id
-  display_name          = "MyTerraformAppSecret"
-  # Optional: Set an end date for the secret
-  # end_date              = "2026-12-31T23:59:59Z"
+# 🔍 Get Microsoft Graph Service Principal
+data "azuread_service_principal" "ms_graph" {
+  display_name = "Microsoft Graph"
 }
 
-output "application_id" {
-  value = azuread_application.my_app_registration.application_id
+# 🆕 Create App Registration
+resource "azuread_application" "example_app" {
+  display_name = "MyGraphApp"
+  sign_in_audience = "AzureADMyOrg"
+  web {
+    redirect_uris = ["https://localhost"]
+  }
 }
 
-output "service_principal_object_id" {
-  value = azuread_service_principal.my_app_service_principal.object_id
+# 🔐 Assign Microsoft Graph API Permissions
+
+## Delegated Permission: User.Read
+resource "azuread_application_api_permission" "user_read" {
+  application_object_id = azuread_application.example_app.object_id
+  api_client_id          = data.azuread_service_principal.ms_graph.client_id
+  permission_id          = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
+  type                   = "Scope"
 }
 
-output "client_secret" {
-  value     = azuread_application_password.my_app_secret.value
-  sensitive = true # Mark as sensitive to prevent output in plain text
+## Application Permission: Directory.ReadWrite.All
+resource "azuread_application_api_permission" "directory_rw" {
+  application_object_id = azuread_application.example_app.object_id
+  api_client_id          = data.azuread_service_principal.ms_graph.client_id
+  permission_id          = "df021288-bdef-4463-88db-98f22de89214" # Directory.ReadWrite.All
+  type                   = "Role"
+}
+
+# 🧾 Optional: Output App Info
+output "app_id" {
+  value = azuread_application.example_app.application_id
+}
+
+output "object_id" {
+  value = azuread_application.example_app.object_id
 }
