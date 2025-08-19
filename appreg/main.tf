@@ -10,7 +10,7 @@ resource "azuread_application" "my_app" {
 
 # Optional: Create Service Principal
 resource "azuread_service_principal" "my_app_sp" {
-  client_id = azuread_application.my_app.application_id
+  application_id = azuread_application.my_app.id
 }
 
 # Create User
