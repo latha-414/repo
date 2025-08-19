@@ -7,11 +7,9 @@ terraform {
   }
 }
 
-provider "azuread" {}
-
-# 🔍 Get Microsoft Graph Service Principal
-data "azuread_service_principal" "ms_graph" {
-  display_name = "Microsoft Graph"
+provider "azuread" {
+  # Optional: specify tenant_id if needed
+  # tenant_id = "your-tenant-id-here"
 }
 
 # 🆕 Create App Registration with Microsoft Graph Permissions
@@ -24,25 +22,28 @@ resource "azuread_application" "example_app" {
   }
 
   required_resource_access {
-    resource_app_id = data.azuread_service_principal.ms_graph.application_id
+    # Microsoft Graph API client ID (well-known)
+    resource_app_id = "00000003-0000-0000-c000-000000000000"
 
+    # Delegated Permission: User.Read
     resource_access {
-      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read (Delegated)
+      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d"
       type = "Scope"
     }
 
+    # Application Permission: Directory.ReadWrite.All
     resource_access {
-      id   = "df021288-bdef-4463-88db-98f22de89214" # Directory.ReadWrite.All (Application)
+      id   = "df021288-bdef-4463-88db-98f22de89214"
       type = "Role"
     }
   }
 }
 
 # 🧾 Output App Info
-output "app_id" {
-  value = azuread_application.example_app.application_id
+output "app_client_id" {
+  value = azuread_application.example_app.client_id
 }
 
-output "object_id" {
+output "app_object_id" {
   value = azuread_application.example_app.object_id
 }
