@@ -13,24 +13,27 @@ terraform {
 }
 
 # Configure the Azure AD provider
-# Uses your current az login session (run `az login` first)
 provider "azuread" {
-  tenant_id = "bc2e6364-d970-4392-87a4-2bfe5ec07c6f"  # 👈 Replace with your actual tenant ID (e.g., aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee)
+  tenant_id = "bc2e6364-d970-4392-87a4-2bfe5ec07c6f"  # Your tenant ID
+}
+
+# Local redirect URIs (defined inline, not as variables)
+locals {
+  redirect_uris = [
+    "https://localhost:3000/signin-oidc",
+    "https://example.com/auth/callback"
+  ]
 }
 
 # Create an App Registration
 resource "azuread_application" "my_app" {
-  display_name = "My-Terraform-App"  # 👈 Change this name if you want
+  display_name = "My-Terraform-App"
 
-  # Optional: Add redirect URIs (e.g., for web app login)
-  # Remove or set empty list if not needed
+  # Conditionally create web block only if redirect_uris is not empty
   dynamic "web" {
-    for_each = length(var.redirect_uris) > 0 ? [1] : []
+    for_each = length(local.redirect_uris) > 0 ? [1] : []
     content {
-      redirect_uris = [
-        "https://localhost:3000/signin-oidc",
-        "https://example.com/auth/callback"
-      ] # 👈 Modify or remove as needed
+      redirect_uris = local.redirect_uris
     }
   }
 }
