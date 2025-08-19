@@ -1,31 +1,31 @@
 variable "tenant_id" {
+  description = "Azure AD Tenant ID"
   type        = string
-  description = "Entra ID tenant ID (GUID)."
 }
 
-variable "default_domain" {
+variable "app_name" {
+  description = "Name of the Azure AD Application"
   type        = string
-  description = "Verified tenant domain, e.g., contoso.onmicrosoft.com"
 }
 
-variable "user_alias" {
+variable "sp_name" {
+  description = "Name of the Service Principal (optional)"
   type        = string
-  description = "Left part of UPN, e.g., demo.user -> demo.user@domain"
-  default     = "demo.user"
+  default     = ""
 }
 
-variable "user_display_name" {
+variable "user_name" {
+  description = "User principal name (e.g., user@domain.com)"
   type        = string
-  default     = "Demo User"
 }
 
-variable "app_display_name" {
+variable "user_password" {
+  description = "Initial password for new users"
   type        = string
-  default     = "demo-app"
+  sensitive   = true
 }
 
-variable "redirect_uris" {
-  type        = list(string)
-  description = "Optional web redirect URIs for the app"
-  default     = []
+variable "group_name" {
+  description = "Name of the Azure AD Group"
+  type        = string
 }
